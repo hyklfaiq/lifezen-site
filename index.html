@@ -1,0 +1,2820 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LifeZen | Student Life, Simplified</title>
+
+    <meta name="description"
+        content="LifeZen is a student-focused Flutter app for managing tasks, schedules, sleep, expenses, budgets and savings.">
+
+    <meta name="theme-color" content="#1671d9">
+
+    <meta property="og:title" content="LifeZen | Student Life, Simplified">
+    <meta property="og:description"
+        content="Tasks, schedules, sleep, expenses and savings in one local-first student app.">
+
+    <link rel="icon" href="./assets/images/zenlife%20icon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --b9: #071a33;
+            --b8: #0d3b78;
+            --b7: #1257a6;
+            --b6: #1671d9;
+            --b5: #2387f0;
+            --b4: #54a8ff;
+            --b1: #eaf4ff;
+            --b0: #f4f9ff;
+            --text: #102033;
+            --muted: #5d6d83;
+            --line: #dce8f5;
+            --ease: cubic-bezier(.2, .8, .2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', Inter, -apple-system, BlinkMacSystemFont,
+                "Segoe UI", Roboto, sans-serif;
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background: #fff;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        ::selection {
+            background: var(--b6);
+            color: #fff;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--b4);
+            outline-offset: 3px;
+        }
+
+        .wrap {
+            width: min(1160px, calc(100% - 36px));
+            margin: 0 auto;
+        }
+
+        .skip {
+            position: absolute;
+            left: 12px;
+            top: -60px;
+            z-index: 999;
+            background: var(--b7);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+        }
+
+        .skip:focus {
+            top: 12px;
+        }
+
+        #bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            transform: scaleX(0);
+            transform-origin: left;
+            background: linear-gradient(90deg, var(--b7), var(--b4));
+            z-index: 1100;
+        }
+
+        /* =========================
+           NAVIGATION
+        ========================= */
+
+        nav.top {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, .82);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid transparent;
+            transition: .3s;
+        }
+
+        nav.top.s {
+            border-color: var(--line);
+            box-shadow: 0 8px 30px rgba(7, 26, 51, .06);
+        }
+
+        .nav {
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 20px;
+            color: var(--b8);
+        }
+
+        .brand img {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            object-fit: cover;
+            transition: transform .4s var(--ease);
+        }
+
+        .brand:hover img {
+            transform: rotate(-8deg) scale(1.08);
+        }
+
+        .links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .links a:not(.btn) {
+            position: relative;
+            transition: color .2s;
+        }
+
+        .links a:not(.btn):hover {
+            color: var(--b6);
+        }
+
+        .links a:not(.btn)::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -6px;
+            height: 2px;
+            width: 100%;
+            background: var(--b6);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform .3s var(--ease);
+        }
+
+        .links a:not(.btn):hover::after {
+            transform: scaleX(1);
+        }
+
+        .burger {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--b8);
+        }
+
+        .drawer {
+            display: none;
+            padding: 8px 18px 18px;
+            background: #fff;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .drawer.open {
+            display: grid;
+            gap: 4px;
+        }
+
+        .drawer a {
+            padding: 12px;
+            border-radius: 9px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .drawer a:hover {
+            background: var(--b0);
+            color: var(--b6);
+        }
+
+        /* =========================
+           BUTTONS
+        ========================= */
+
+        .btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+            padding: 0 22px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            overflow: hidden;
+            isolation: isolate;
+            transition:
+                transform .25s var(--ease),
+                box-shadow .25s,
+                background .25s;
+        }
+
+        .btn::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 -80%;
+            width: 60%;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, .35),
+                    transparent);
+            transform: skewX(-20deg);
+            transition: left .7s;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            left: 130%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .btn-p {
+            color: #fff;
+            background: linear-gradient(135deg, var(--b7), var(--b5));
+            box-shadow: 0 12px 26px rgba(22, 113, 217, .25);
+        }
+
+        .btn-p:hover {
+            box-shadow: 0 18px 36px rgba(22, 113, 217, .38);
+        }
+
+        .btn-s {
+            background: #fff;
+            color: var(--b8);
+            border: 1px solid var(--line);
+        }
+
+        .btn-s:hover {
+            background: var(--b0);
+            box-shadow: 0 12px 26px rgba(13, 59, 120, .08);
+        }
+
+        .btn.sm {
+            min-height: 40px;
+            padding: 0 16px;
+            color: #fff;
+            background: linear-gradient(135deg, var(--b6), var(--b5));
+        }
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 105px 0 115px;
+            background:
+                radial-gradient(circle at 75% 20%,
+                    rgba(35, 135, 240, .15),
+                    transparent 34%),
+                linear-gradient(180deg, var(--b0), #fff);
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: .5;
+            pointer-events: none;
+            animation: drift 14s ease-in-out infinite;
+        }
+
+        .blob.a {
+            width: 340px;
+            height: 340px;
+            background: #bfe0ff;
+            left: -100px;
+            top: 60px;
+        }
+
+        .blob.b {
+            width: 280px;
+            height: 280px;
+            background: #d5e9ff;
+            right: 5%;
+            bottom: -80px;
+            animation-delay: -6s;
+        }
+
+        @keyframes drift {
+            50% {
+                transform: translate(40px, -30px) scale(1.12);
+            }
+        }
+
+        .hero-grid {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1.05fr .95fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 13px;
+            border-radius: 99px;
+            background: var(--b1);
+            color: var(--b7);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            margin-bottom: 22px;
+        }
+
+        .tag i {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--b6);
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(22, 113, 217, .5);
+            }
+
+            100% {
+                box-shadow: 0 0 0 10px rgba(22, 113, 217, 0);
+            }
+        }
+
+        h1 {
+            font-size: clamp(42px, 6vw, 72px);
+            line-height: 1.02;
+            letter-spacing: -.055em;
+            color: var(--b9);
+            margin-bottom: 22px;
+        }
+
+        h1 .w {
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: bottom;
+            padding-bottom: .08em;
+        }
+
+        h1 .w>span {
+            display: inline-block;
+            transform: translateY(110%);
+            animation: up .9s var(--ease) forwards;
+            animation-delay: calc(var(--i) * .09s + .2s);
+        }
+
+        @keyframes up {
+            to {
+                transform: none;
+            }
+        }
+
+        h1 em {
+            font-style: normal;
+            background:
+                linear-gradient(100deg,
+                    var(--b7),
+                    var(--b4),
+                    var(--b7));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: sheen 4s linear infinite;
+        }
+
+        @keyframes sheen {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .lead {
+            max-width: 560px;
+            color: var(--muted);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .fade {
+            opacity: 0;
+            transform: translateY(18px);
+            animation: fadeUp .9s var(--ease) forwards;
+            animation-delay: var(--d, .6s);
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .cta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .chips {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 26px;
+        }
+
+        .chips li {
+            padding: 6px 12px;
+            border: 1px solid var(--line);
+            border-radius: 99px;
+            background: #fff;
+            color: var(--muted);
+            font-size: 12.5px;
+            font-weight: 600;
+        }
+
+        /* =========================
+           HERO VISUAL
+           CLEAN LAYERED CARD DESIGN
+        ========================= */
+
+        .hero-visual {
+            position: relative;
+            display: grid;
+            place-items: center;
+            min-height: 500px;
+        }
+
+        .hero-visual::before {
+            content: "";
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            border-radius: 50%;
+            background: rgba(84, 168, 255, .18);
+            filter: blur(70px);
+            pointer-events: none;
+        }
+
+        .hero-stack {
+            position: absolute;
+            width: 255px;
+            height: 345px;
+            border-radius: 34px;
+            background: #fff;
+            border: 1px solid rgba(22, 113, 217, .08);
+            box-shadow: 0 25px 60px rgba(13, 59, 120, .10);
+        }
+
+        .stack-back {
+            transform: translate(-38px, 22px) rotate(-8deg);
+            opacity: .55;
+        }
+
+        .stack-mid {
+            transform: translate(30px, 10px) rotate(7deg);
+            opacity: .78;
+        }
+
+        .hero-logo {
+            position: relative;
+            z-index: 2;
+            width: 255px;
+            height: 255px;
+            padding: 22px;
+            border-radius: 58px;
+            background: #fff;
+            border: 1px solid rgba(22, 113, 217, .1);
+            box-shadow:
+                0 30px 70px rgba(13, 59, 120, .16),
+                0 8px 20px rgba(13, 59, 120, .06);
+            animation: logoFloat 5s ease-in-out infinite;
+        }
+
+        .hero-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 42px;
+        }
+
+        @keyframes logoFloat {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .logo-badge {
+            position: absolute;
+            z-index: 3;
+            padding: 10px 15px;
+            border-radius: 14px;
+            background: #fff;
+            border: 1px solid var(--line);
+            box-shadow: 0 16px 35px rgba(13, 59, 120, .12);
+            color: var(--b7);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .logo-badge.one {
+            top: 14%;
+            left: 3%;
+        }
+
+        .logo-badge.two {
+            right: 1%;
+            bottom: 14%;
+        }
+
+        /* =========================
+           MARQUEE
+        ========================= */
+
+        .marq {
+            border-block: 1px solid var(--line);
+            background: #fff;
+            overflow: hidden;
+            padding: 18px 0;
+        }
+
+        .track {
+            display: flex;
+            gap: 46px;
+            width: max-content;
+            animation: scroll 32s linear infinite;
+            font-weight: 800;
+            font-size: 15px;
+            color: var(--b7);
+            letter-spacing: -.01em;
+        }
+
+        .track span::before {
+            content: "\2726";
+            margin-right: 46px;
+            color: var(--b4);
+        }
+
+        .marq:hover .track {
+            animation-play-state: paused;
+        }
+
+        @keyframes scroll {
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* =========================
+           GENERAL SECTIONS
+        ========================= */
+
+        section {
+            scroll-margin-top: 80px;
+        }
+
+        .sec {
+            padding: 100px 0;
+        }
+
+        .label {
+            color: var(--b6);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            font-size: clamp(32px, 4vw, 48px);
+            line-height: 1.08;
+            letter-spacing: -.045em;
+            color: var(--b9);
+            margin-bottom: 16px;
+        }
+
+        .sub {
+            color: var(--muted);
+            max-width: 620px;
+        }
+
+        .head {
+            margin-bottom: 48px;
+        }
+
+        .rv {
+            opacity: 0;
+            transform: translateY(34px) scale(.98);
+            transition:
+                opacity .8s ease,
+                transform .8s var(--ease);
+        }
+
+        .rv.in {
+            opacity: 1;
+            transform: none;
+        }
+
+        .rv.d1 {
+            transition-delay: .08s;
+        }
+
+        .rv.d2 {
+            transition-delay: .16s;
+        }
+
+        .rv.d3 {
+            transition-delay: .24s;
+        }
+
+        /* =========================
+           APP SCREENSHOW
+        ========================= */
+
+        .showcase {
+            padding: 100px 0;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .showcase-head {
+            text-align: center;
+            max-width: 680px;
+            margin: 0 auto 50px;
+        }
+
+        .showcase-head .sub {
+            margin: 0 auto;
+        }
+
+        .screens {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 18px;
+            align-items: end;
+        }
+
+        .screen-card {
+            position: relative;
+            text-align: center;
+        }
+
+        .screen-frame {
+            position: relative;
+            padding: 7px;
+            border-radius: 28px;
+            background: linear-gradient(145deg, #12345f, var(--b9));
+            box-shadow: 0 25px 50px rgba(13, 59, 120, .16);
+            transition:
+                transform .4s var(--ease),
+                box-shadow .4s;
+        }
+
+        .screen-frame img {
+            width: 100%;
+            aspect-ratio: 9 / 19;
+            object-fit: cover;
+            object-position: top;
+            border-radius: 22px;
+            background: var(--b0);
+        }
+
+        .screen-card:nth-child(1) .screen-frame,
+        .screen-card:nth-child(5) .screen-frame {
+            transform: translateY(24px);
+        }
+
+        .screen-card:hover .screen-frame {
+            transform: translateY(-10px) scale(1.025);
+            box-shadow: 0 35px 70px rgba(13, 59, 120, .24);
+        }
+
+        .screen-card:nth-child(1):hover .screen-frame,
+        .screen-card:nth-child(5):hover .screen-frame {
+            transform: translateY(-4px) scale(1.025);
+        }
+
+        .screen-info {
+            padding-top: 24px;
+        }
+
+        .screen-info h3 {
+            font-size: 16px;
+            color: var(--b9);
+            margin-bottom: 4px;
+        }
+
+        .screen-info p {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* =========================
+           FEATURES
+        ========================= */
+
+        .bento {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .tile {
+            position: relative;
+            padding: 26px;
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            background: #fff;
+            overflow: hidden;
+            transition:
+                transform .35s var(--ease),
+                box-shadow .3s,
+                border-color .3s;
+        }
+
+        .tile::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(240px circle at var(--mx, 50%) var(--my, 0%),
+                    rgba(35, 135, 240, .12),
+                    transparent 70%);
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .tile:hover {
+            transform: translateY(-6px);
+            border-color: #bcd8f2;
+            box-shadow: 0 24px 50px rgba(13, 59, 120, .12);
+        }
+
+        .tile:hover::before {
+            opacity: 1;
+        }
+
+        .tile.w2 {
+            grid-column: span 2;
+        }
+
+        .tile.blue {
+            background: linear-gradient(135deg, var(--b8), var(--b6));
+            color: #fff;
+            border: 0;
+        }
+
+        .tile.blue p {
+            color: #cfe6ff;
+        }
+
+        .ico {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--b1);
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            margin-bottom: 18px;
+            transition: transform .4s var(--ease);
+        }
+
+        .tile:hover .ico {
+            transform: rotate(-8deg) scale(1.12);
+        }
+
+        .tile.blue .ico {
+            background: rgba(255, 255, 255, .16);
+        }
+
+        .tile h3 {
+            position: relative;
+            font-size: 17px;
+            color: var(--b9);
+            margin-bottom: 6px;
+        }
+
+        .tile.blue h3 {
+            color: #fff;
+        }
+
+        .tile p {
+            position: relative;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        /* =========================
+           I-MALUUM
+        ========================= */
+
+        .imp {
+            background: var(--b0);
+            overflow: hidden;
+        }
+
+        .imp-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            padding: 56px;
+            border-radius: 34px;
+            background: #fff;
+            border: 1px solid var(--line);
+            box-shadow: 0 20px 55px rgba(13, 59, 120, .08);
+        }
+
+        .ticks {
+            list-style: none;
+            display: grid;
+            gap: 10px;
+            margin-top: 22px;
+            font-size: 14px;
+            color: #405168;
+            font-weight: 600;
+        }
+
+        .ticks li::before {
+            content: "\2713";
+            display: inline-grid;
+            place-items: center;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 50%;
+            background: var(--b1);
+            color: var(--b6);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .import-flow {
+            position: relative;
+            min-height: 320px;
+            display: grid;
+            place-items: center;
+        }
+
+        .import-line {
+            position: absolute;
+            top: 50%;
+            left: 16%;
+            right: 16%;
+            height: 2px;
+            background: linear-gradient(90deg,
+                    var(--b4),
+                    var(--b6),
+                    var(--b4));
+            transform: translateY(-50%);
+        }
+
+        .import-steps {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            width: 100%;
+        }
+
+        .import-card {
+            min-height: 150px;
+            padding: 20px 14px;
+            border-radius: 20px;
+            background: #fff;
+            border: 1px solid var(--line);
+            box-shadow: 0 16px 35px rgba(13, 59, 120, .08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .import-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            background: var(--b1);
+            display: grid;
+            place-items: center;
+            color: var(--b7);
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .import-card h3 {
+            font-size: 14px;
+            color: var(--b9);
+            margin-bottom: 3px;
+        }
+
+        .import-card p {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        /* =========================
+           PRIVACY
+        ========================= */
+
+        .priv {
+            background:
+                radial-gradient(circle at 90% 15%,
+                    rgba(35, 135, 240, .18),
+                    transparent 30%),
+                var(--b9);
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .priv::before {
+            content: "";
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            right: -330px;
+            bottom: -330px;
+            border: 1px solid rgba(117, 184, 255, .12);
+            border-radius: 50%;
+            animation: spin 20s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .priv h2 {
+            color: #fff;
+        }
+
+        .priv .label {
+            color: #75b8ff;
+        }
+
+        .priv .sub {
+            color: #aebfd4;
+        }
+
+        .pgrid {
+            position: relative;
+            display: grid;
+            grid-template-columns: .9fr 1.1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .pts {
+            display: grid;
+            gap: 14px;
+        }
+
+        .pt {
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, .045);
+            transition: .3s var(--ease);
+        }
+
+        .pt:hover {
+            transform: translateX(8px);
+            background: rgba(255, 255, 255, .08);
+            border-color: rgba(117, 184, 255, .3);
+        }
+
+        .pt i {
+            flex: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(117, 184, 255, .13);
+            display: grid;
+            place-items: center;
+            font-style: normal;
+        }
+
+        .pt h3 {
+            font-size: 15px;
+        }
+
+        .pt p {
+            color: #9eb1c8;
+            font-size: 13px;
+        }
+
+        /* =========================
+           GET STARTED
+        ========================= */
+
+        .steps {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            counter-reset: s;
+        }
+
+        .steps li {
+            counter-increment: s;
+            padding: 28px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: var(--b0);
+        }
+
+        .steps li::before {
+            content: counter(s);
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            margin-bottom: 16px;
+            border-radius: 50%;
+            background: var(--b6);
+            color: #fff;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .steps h3 {
+            color: var(--b9);
+            font-size: 17px;
+            margin-bottom: 6px;
+        }
+
+        .steps p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* =========================
+           FAQ
+        ========================= */
+
+        .faq {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        details {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            background: #fff;
+            transition: box-shadow .3s;
+        }
+
+        details[open] {
+            box-shadow: 0 12px 30px rgba(13, 59, 120, .08);
+        }
+
+        summary {
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            padding: 18px 22px;
+            font-weight: 700;
+            color: var(--b8);
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            font-size: 20px;
+            line-height: 1;
+            color: var(--b6);
+            transition: transform .3s var(--ease);
+        }
+
+        details[open] summary::after {
+            transform: rotate(45deg);
+        }
+
+        details p {
+            padding: 0 22px 18px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* =========================
+           DOWNLOAD
+        ========================= */
+
+        .dl {
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            color: #fff;
+            padding: 76px 40px;
+            border-radius: 34px;
+            background:
+                radial-gradient(circle at 88% 15%,
+                    rgba(117, 184, 255, .25),
+                    transparent 30%),
+                linear-gradient(135deg, var(--b8), var(--b6));
+            box-shadow: 0 25px 60px rgba(13, 59, 120, .2);
+        }
+
+        .dl::before {
+            content: "";
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            right: -120px;
+            bottom: -160px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 50%;
+            animation: spin 12s linear infinite;
+        }
+
+        .dl h2 {
+            color: #fff;
+            max-width: 640px;
+            margin: 0 auto 14px;
+        }
+
+        .dl p {
+            max-width: 560px;
+            margin: 0 auto 28px;
+            color: #c9e3ff;
+        }
+
+        .dl .btn {
+            background: #fff;
+            color: var(--b7);
+            position: relative;
+        }
+
+        .dl .btn:hover {
+            background: #f1f7ff;
+        }
+
+        .note {
+            padding: 28px 0;
+            background: #f8fbff;
+            border-top: 1px solid var(--line);
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            padding: 50px 0 28px;
+            background: var(--b9);
+            color: #fff;
+        }
+
+        .ft {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 50px;
+            padding-bottom: 36px;
+            border-bottom: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        footer .brand {
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        footer p,
+        footer li a {
+            color: #9eb1c8;
+            font-size: 13px;
+        }
+
+        footer h4 {
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        footer ul {
+            list-style: none;
+            display: grid;
+            gap: 8px;
+        }
+
+        footer li a:hover {
+            color: #fff;
+        }
+
+        .fb {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding-top: 22px;
+            color: #73879f;
+            font-size: 12px;
+        }
+
+        #top {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--b7);
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(13, 59, 120, .12);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(14px);
+            transition: .25s;
+            z-index: 900;
+        }
+
+        #top.on {
+            opacity: 1;
+            visibility: visible;
+            transform: none;
+        }
+
+        #top:hover {
+            background: var(--b6);
+            color: #fff;
+        }
+
+        /* =========================
+           TABLET
+        ========================= */
+
+        @media (max-width: 950px) {
+
+            .hero-grid,
+            .imp-box,
+            .pgrid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-grid {
+                gap: 20px;
+            }
+
+            .hero-visual {
+                min-height: 420px;
+            }
+
+            .imp-box {
+                padding: 36px 24px;
+                gap: 36px;
+            }
+
+            .pgrid {
+                gap: 40px;
+            }
+
+            .bento {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .screens {
+                grid-template-columns: repeat(3, 1fr);
+                max-width: 700px;
+                margin: 0 auto;
+            }
+
+            .screen-card:nth-child(1) .screen-frame,
+            .screen-card:nth-child(5) .screen-frame {
+                transform: none;
+            }
+
+            .screen-card:nth-child(4) {
+                grid-column: 1 / 2;
+                margin-left: calc(50% + 9px);
+                width: calc(100% - 9px);
+            }
+
+            .screen-card:nth-child(5) {
+                grid-column: 2 / 3;
+            }
+
+            .ft {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 700px) {
+
+            .links {
+                display: none;
+            }
+
+            .burger {
+                display: block;
+            }
+
+            .hero {
+                padding: 65px 0 70px;
+            }
+
+            .hero-grid {
+                gap: 10px;
+            }
+
+            .hero-visual {
+                min-height: 350px;
+                margin-top: 10px;
+            }
+
+            .hero-logo {
+                width: 190px;
+                height: 190px;
+                padding: 16px;
+                border-radius: 44px;
+            }
+
+            .hero-stack {
+                width: 205px;
+                height: 280px;
+                border-radius: 28px;
+            }
+
+            .stack-back {
+                transform: translate(-27px, 18px) rotate(-8deg);
+            }
+
+            .stack-mid {
+                transform: translate(24px, 8px) rotate(7deg);
+            }
+
+            .hero-visual::before {
+                width: 280px;
+                height: 280px;
+            }
+
+            .logo-badge {
+                font-size: 10px;
+                padding: 8px 11px;
+            }
+
+            .logo-badge.one {
+                left: 0;
+                top: 12%;
+            }
+
+            .logo-badge.two {
+                right: 0;
+                bottom: 12%;
+            }
+
+            .sec {
+                padding: 70px 0;
+            }
+
+            .showcase {
+                padding: 70px 0;
+            }
+
+            .bento,
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .tile.w2 {
+                grid-column: auto;
+            }
+
+            .screens {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px;
+            }
+
+            .screen-card:nth-child(4) {
+                grid-column: auto;
+                margin-left: 0;
+                width: auto;
+            }
+
+            .screen-card:nth-child(5) {
+                grid-column: 1 / -1;
+                max-width: 48%;
+                margin: 0 auto;
+            }
+
+            .screen-frame {
+                border-radius: 22px;
+                padding: 6px;
+            }
+
+            .screen-frame img {
+                border-radius: 17px;
+            }
+
+            .import-steps {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .import-line {
+                left: 50%;
+                right: auto;
+                top: 10%;
+                bottom: 10%;
+                width: 2px;
+                height: auto;
+                transform: translateX(-50%);
+            }
+
+            .import-card {
+                min-height: 110px;
+            }
+
+            .ft {
+                grid-template-columns: 1fr;
+            }
+
+            .fb {
+                flex-direction: column;
+            }
+
+            .cta .btn {
+                width: 100%;
+            }
+
+            .dl {
+                padding: 56px 22px;
+            }
+        }
+
+        /* =========================
+           REDUCED MOTION
+        ========================= */
+
+        @media (prefers-reduced-motion: reduce) {
+
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+            }
+
+            h1 .w>span,
+            .fade {
+                opacity: 1;
+                transform: none;
+            }
+
+            .rv {
+                opacity: 1;
+                transform: none;
+            }
+
+            .track {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="#features" class="skip">
+        Skip to content
+    </a>
+
+    <div id="bar"></div>
+
+    <!-- =========================
+         NAVIGATION
+    ========================= -->
+
+    <nav class="top" id="nav">
+
+        <div class="wrap nav">
+
+            <a href="#home" class="brand">
+
+                <img src="./assets/images/zenlife%20icon.png" alt="LifeZen logo">
+
+                <span>LifeZen</span>
+
+            </a>
+
+            <div class="links">
+
+                <a href="#screens">App</a>
+
+                <a href="#features">Features</a>
+
+                <a href="#integration">i-Ma'luum</a>
+
+                <a href="#privacy">Privacy</a>
+
+                <a href="#faq">FAQ</a>
+
+                <a class="btn sm" href="https://github.com/hyklfaiq/LifeZen/releases" target="_blank"
+                    rel="noopener noreferrer">
+                    Download
+                </a>
+
+            </div>
+
+            <button class="burger" id="burger" aria-label="Open navigation menu" aria-expanded="false">
+                &#9776;
+            </button>
+
+        </div>
+
+        <div class="drawer" id="drawer">
+
+            <a href="#screens">App</a>
+
+            <a href="#features">Features</a>
+
+            <a href="#integration">i-Ma'luum</a>
+
+            <a href="#privacy">Privacy</a>
+
+            <a href="#faq">FAQ</a>
+
+            <a href="https://github.com/hyklfaiq/LifeZen/releases" target="_blank" rel="noopener noreferrer">
+                Download
+            </a>
+
+        </div>
+
+    </nav>
+
+    <main>
+
+        <!-- =========================
+             HERO
+        ========================= -->
+
+        <section class="hero" id="home">
+
+            <span class="blob a"></span>
+            <span class="blob b"></span>
+
+            <div class="wrap hero-grid">
+
+                <div>
+
+                    <div class="tag fade" style="--d:.1s">
+                        <i></i>
+                        Student productivity app
+                    </div>
+
+                    <h1 aria-label="Your student life, in one place.">
+
+                        <span class="w">
+                            <span style="--i:0">Your</span>
+                        </span>
+
+                        <span class="w">
+                            <span style="--i:1">student</span>
+                        </span>
+
+                        <span class="w">
+                            <span style="--i:2">life,</span>
+                        </span>
+
+                        <br>
+
+                        <span class="w">
+                            <span style="--i:3">
+                                <em>in&nbsp;one&nbsp;place.</em>
+                            </span>
+                        </span>
+
+                    </h1>
+
+                    <p class="lead fade" style="--d:.7s">
+
+                        LifeZen brings your tasks, timetable, sleep,
+                        expenses, budgets and savings together in one
+                        simple student app.
+
+                    </p>
+
+                    <div class="cta fade" style="--d:.85s">
+
+                        <a class="btn btn-p" href="https://github.com/hyklfaiq/LifeZen/releases" target="_blank"
+                            rel="noopener noreferrer">
+                            Download LifeZen
+                        </a>
+
+                        <a class="btn btn-s" href="https://github.com/hyklfaiq/LifeZen" target="_blank"
+                            rel="noopener noreferrer">
+                            View on GitHub
+                        </a>
+
+                    </div>
+
+                    <ul class="chips fade" style="--d:1s">
+
+                        <li>Open source (MIT)</li>
+
+                        <li>No account needed</li>
+
+                        <li>Data stays on your device</li>
+
+                        <li>Android 5.0+</li>
+
+                    </ul>
+
+                </div>
+
+                <!-- HERO LOGO -->
+
+                <div class="hero-visual">
+
+                    <div class="hero-stack stack-back"></div>
+
+                    <div class="hero-stack stack-mid"></div>
+
+                    <div class="logo-badge one">
+                        Built for students
+                    </div>
+
+                    <div class="logo-badge two">
+                        Simple. Local. Open source.
+                    </div>
+
+                    <div class="hero-logo">
+
+                        <img src="./assets/images/zenlife%20icon.png" alt="LifeZen app logo">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =========================
+             MARQUEE
+        ========================= -->
+
+        <div class="marq" aria-hidden="true">
+
+            <div class="track" id="track">
+
+                <span>Task Planner</span>
+
+                <span>Weekly Schedule</span>
+
+                <span>i-Ma'luum Import</span>
+
+                <span>Sleep Tracker</span>
+
+                <span>Expense Tracker</span>
+
+                <span>Budget &amp; Savings</span>
+
+                <span>Reminders</span>
+
+                <span>Dark Mode</span>
+
+                <span>Local Storage</span>
+
+            </div>
+
+        </div>
+
+        <!-- =========================
+             APP SHOWCASE
+        ========================= -->
+
+        <section class="showcase" id="screens">
+
+            <div class="wrap">
+
+                <div class="showcase-head rv">
+
+                    <div class="label">
+                        Inside LifeZen
+                    </div>
+
+                    <h2>
+                        Everything you need, in one app.
+                    </h2>
+
+                    <p class="sub">
+                        Explore the five main areas of LifeZen,
+                        from your daily overview to planning,
+                        health and personal finances.
+                    </p>
+
+                </div>
+
+                <div class="screens">
+
+                    <article class="screen-card rv">
+
+                        <div class="screen-frame">
+
+                            <img src="./assets/images/home.png" alt="LifeZen Home screen">
+
+                        </div>
+
+                        <div class="screen-info">
+
+                            <h3>Home</h3>
+
+                            <p>Your daily overview</p>
+
+                        </div>
+
+                    </article>
+
+                    <article class="screen-card rv d1">
+
+                        <div class="screen-frame">
+
+                            <img src="./assets/images/planner.png" alt="LifeZen Planner screen">
+
+                        </div>
+
+                        <div class="screen-info">
+
+                            <h3>Planner</h3>
+
+                            <p>Tasks and daily plans</p>
+
+                        </div>
+
+                    </article>
+
+                    <article class="screen-card rv d2">
+
+                        <div class="screen-frame">
+
+                            <img src="./assets/images/schedule.png" alt="LifeZen Schedule screen">
+
+                        </div>
+
+                        <div class="screen-info">
+
+                            <h3>Schedule</h3>
+
+                            <p>Classes and activities</p>
+
+                        </div>
+
+                    </article>
+
+                    <article class="screen-card rv d3">
+
+                        <div class="screen-frame">
+
+                            <img src="./assets/images/health.png" alt="LifeZen Health screen">
+
+                        </div>
+
+                        <div class="screen-info">
+
+                            <h3>Health</h3>
+
+                            <p>Sleep and wellbeing</p>
+
+                        </div>
+
+                    </article>
+
+                    <article class="screen-card rv">
+
+                        <div class="screen-frame">
+
+                            <img src="./assets/images/money.png" alt="LifeZen Money screen">
+
+                        </div>
+
+                        <div class="screen-info">
+
+                            <h3>Money</h3>
+
+                            <p>Expenses and savings</p>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =========================
+             FEATURES
+        ========================= -->
+
+        <section class="sec" id="features">
+
+            <div class="wrap">
+
+                <div class="head rv">
+
+                    <div class="label">
+                        Features
+                    </div>
+
+                    <h2>
+                        Built around everyday student needs.
+                    </h2>
+
+                    <p class="sub">
+                        The parts of daily student life that are
+                        easy to forget, in one simple app.
+                    </p>
+
+                </div>
+
+                <div class="bento">
+
+                    <article class="tile w2 blue rv">
+
+                        <div class="ico">&#9989;</div>
+
+                        <h3>
+                            Task Planner
+                        </h3>
+
+                        <p>
+                            Create daily tasks, assign dates,
+                            mark work complete and view plans
+                            through the calendar.
+                        </p>
+
+                    </article>
+
+                    <article class="tile rv d1">
+
+                        <div class="ico">&#128197;</div>
+
+                        <h3>
+                            Schedule
+                        </h3>
+
+                        <p>
+                            Recurring weekly activities with
+                            scheduled notifications.
+                        </p>
+
+                    </article>
+
+                    <article class="tile rv d2">
+
+                        <div class="ico">&#128229;</div>
+
+                        <h3>
+                            i-Ma'luum Import
+                        </h3>
+
+                        <p>
+                            Bring timetable information in
+                            instead of typing it.
+                        </p>
+
+                    </article>
+
+                    <article class="tile rv">
+
+                        <div class="ico">&#127769;</div>
+
+                        <h3>
+                            Sleep Tracker
+                        </h3>
+
+                        <p>
+                            Log sleep and wake times,
+                            track duration and review history.
+                        </p>
+
+                    </article>
+
+                    <article class="tile rv d1">
+
+                        <div class="ico">&#128179;</div>
+
+                        <h3>
+                            Expense Tracker
+                        </h3>
+
+                        <p>
+                            Record spending by category
+                            and monitor each month.
+                        </p>
+
+                    </article>
+
+                    <article class="tile w2 rv d2">
+
+                        <div class="ico">&#127974;</div>
+
+                        <h3>
+                            Budget &amp; Savings
+                        </h3>
+
+                        <p>
+                            Set budgets, calculate weekly
+                            spending limits and track progress
+                            toward savings goals.
+                        </p>
+
+                    </article>
+
+                    <article class="tile rv">
+
+                        <div class="ico">&#128276;</div>
+
+                        <h3>
+                            Reminders
+                        </h3>
+
+                        <p>
+                            Nudges for tasks and activities
+                            so nothing slips.
+                        </p>
+
+                    </article>
+
+                    <article class="tile rv d1">
+
+                        <div class="ico">&#127763;</div>
+
+                        <h3>
+                            Dark Mode
+                        </h3>
+
+                        <p>
+                            A darker interface that is
+                            easier on the eyes.
+                        </p>
+
+                    </article>
+
+                    <article class="tile w2 rv d2">
+
+                        <div class="ico">&#128274;</div>
+
+                        <h3>
+                            Local Storage
+                        </h3>
+
+                        <p>
+                            Core data is stored on your device
+                            with Shared Preferences, with no
+                            online account required.
+                        </p>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =========================
+             I-MALUUM
+        ========================= -->
+
+        <section class="sec imp" id="integration">
+
+            <div class="wrap">
+
+                <div class="imp-box rv">
+
+                    <div>
+
+                        <div class="label">
+                            i-Ma'luum Integration
+                        </div>
+
+                        <h2>
+                            Bring your timetable into LifeZen.
+                        </h2>
+
+                        <p class="sub">
+                            Import timetable information from
+                            i-Ma'luum instead of entering every
+                            class by hand.
+                        </p>
+
+                        <ul class="ticks">
+
+                            <li>
+                                Import timetable information
+                            </li>
+
+                            <li>
+                                Reduce repetitive manual entry
+                            </li>
+
+                            <li>
+                                Keep imported schedules inside LifeZen
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                    <div class="import-flow">
+
+                        <div class="import-line"></div>
+
+                        <div class="import-steps">
+
+                            <div class="import-card">
+
+                                <div class="import-icon">
+                                    &#127891;
+                                </div>
+
+                                <h3>
+                                    i-Ma'luum
+                                </h3>
+
+                                <p>
+                                    Your timetable
+                                </p>
+
+                            </div>
+
+                            <div class="import-card">
+
+                                <div class="import-icon">
+                                    &#8680;
+                                </div>
+
+                                <h3>
+                                    Import
+                                </h3>
+
+                                <p>
+                                    Bring it into LifeZen
+                                </p>
+
+                            </div>
+
+                            <div class="import-card">
+
+                                <div class="import-icon">
+                                    &#128197;
+                                </div>
+
+                                <h3>
+                                    LifeZen
+                                </h3>
+
+                                <p>
+                                    Ready in your schedule
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =========================
+             PRIVACY
+        ========================= -->
+
+        <section class="sec priv" id="privacy">
+
+            <div class="wrap pgrid">
+
+                <div class="rv">
+
+                    <div class="label">
+                        Local first
+                    </div>
+
+                    <h2>
+                        Your everyday data stays on your device.
+                    </h2>
+
+                    <p class="sub">
+                        LifeZen's core features use local storage.
+                        No account and no online database are needed
+                        for the main parts of the app.
+                    </p>
+
+                </div>
+
+                <div class="pts">
+
+                    <div class="pt rv">
+
+                        <i>&#128274;</i>
+
+                        <div>
+
+                            <h3>
+                                Local storage
+                            </h3>
+
+                            <p>
+                                Tasks, schedules, sleep, expenses,
+                                budget and savings are stored locally.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="pt rv d1">
+
+                        <i>&#128737;</i>
+
+                        <div>
+
+                            <h3>
+                                No core account required
+                            </h3>
+
+                            <p>
+                                Manage everyday information
+                                without signing up.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="pt rv d2">
+
+                        <i>&#10024;</i>
+
+                        <div>
+
+                            <h3>
+                                Simple by design
+                            </h3>
+
+                            <p>
+                                Useful everyday features without
+                                a complicated backend.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =========================
+             GET STARTED
+        ========================= -->
+
+        <section class="sec">
+
+            <div class="wrap">
+
+                <div class="head rv">
+
+                    <div class="label">
+                        Get started
+                    </div>
+
+                    <h2>
+                        Up and running in three steps.
+                    </h2>
+
+                </div>
+
+                <ol class="steps">
+
+                    <li class="rv">
+
+                        <h3>
+                            Download the APK
+                        </h3>
+
+                        <p>
+                            Open the latest GitHub release
+                            and download the .apk file.
+                        </p>
+
+                    </li>
+
+                    <li class="rv d1">
+
+                        <h3>
+                            Allow the install
+                        </h3>
+
+                        <p>
+                            If prompted, allow installs from
+                            your browser or file manager.
+                        </p>
+
+                    </li>
+
+                    <li class="rv d2">
+
+                        <h3>
+                            Add your timetable
+                        </h3>
+
+                        <p>
+                            Import from i-Ma'luum or
+                            add tasks manually.
+                        </p>
+
+                    </li>
+
+                </ol>
+
+            </div>
+
+        </section>
+
+        <!-- =========================
+             FAQ
+        ========================= -->
+
+        <section class="sec" id="faq" style="background:var(--b0)">
+
+            <div class="wrap faq">
+
+                <div class="head rv" style="text-align:center">
+
+                    <div class="label">
+                        FAQ
+                    </div>
+
+                    <h2>
+                        Quick answers.
+                    </h2>
+
+                </div>
+
+                <details class="rv">
+
+                    <summary>
+                        Is there an iOS version?
+                    </summary>
+
+                    <p>
+                        Not currently. LifeZen is released
+                        as an Android APK (API 21+).
+                    </p>
+
+                </details>
+
+                <details class="rv">
+
+                    <summary>
+                        Do I need an account?
+                    </summary>
+
+                    <p>
+                        No. Core features work without one
+                        and store data locally.
+                    </p>
+
+                </details>
+
+                <details class="rv">
+
+                    <summary>
+                        Is the i-Ma'luum import official?
+                    </summary>
+
+                    <p>
+                        No. It is a convenience feature from
+                        an independent student project, not an
+                        IIUM service.
+                    </p>
+
+                </details>
+
+                <details class="rv">
+
+                    <summary>
+                        Which technologies does it use?
+                    </summary>
+
+                    <p>
+                        Flutter and Dart, with Shared Preferences,
+                        Local Notifications and Image Picker.
+                    </p>
+
+                </details>
+
+            </div>
+
+        </section>
+
+        <!-- =========================
+             DOWNLOAD
+        ========================= -->
+
+        <section class="sec" id="download">
+
+            <div class="wrap">
+
+                <div class="dl rv">
+
+                    <h2>
+                        Start organizing your student life.
+                    </h2>
+
+                    <p>
+                        Download the latest LifeZen Android release
+                        from GitHub and keep your plans, wellbeing
+                        and finances in one place.
+                    </p>
+
+                    <a class="btn" href="https://github.com/hyklfaiq/LifeZen/releases" target="_blank"
+                        rel="noopener noreferrer">
+                        Download APK
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =========================
+             DISCLAIMER
+        ========================= -->
+
+        <div class="note">
+
+            <div class="wrap">
+
+                LifeZen is an independent student project and is not
+                affiliated with, endorsed by, sponsored by, or officially
+                connected to IIUM or i-Ma'luum. The i-Ma'luum integration
+                is a convenience feature and not an official IIUM service.
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- =========================
+         FOOTER
+    ========================= -->
+
+    <footer>
+
+        <div class="wrap">
+
+            <div class="ft">
+
+                <div>
+
+                    <div class="brand">
+
+                        <img src="./assets/images/zenlife%20icon.png" alt="LifeZen logo">
+
+                        <span>
+                            LifeZen
+                        </span>
+
+                    </div>
+
+                    <p>
+                        A student-focused Flutter application for
+                        everyday tasks, schedules, wellbeing and
+                        personal finances.
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <h4>
+                        Project
+                    </h4>
+
+                    <ul>
+
+                        <li>
+                            <a href="https://github.com/hyklfaiq/LifeZen" target="_blank" rel="noopener noreferrer">
+                                GitHub
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="https://github.com/hyklfaiq/LifeZen/releases" target="_blank"
+                                rel="noopener noreferrer">
+                                Releases
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="https://github.com/hyklfaiq/LifeZen/issues" target="_blank"
+                                rel="noopener noreferrer">
+                                Issues
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+                <div>
+
+                    <h4>
+                        LifeZen
+                    </h4>
+
+                    <ul>
+
+                        <li>
+                            <a href="#screens">
+                                App
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#features">
+                                Features
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#integration">
+                                i-Ma'luum
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#privacy">
+                                Privacy
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#download">
+                                Download
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <div class="fb">
+
+                <span>
+                    &copy; 2026 LifeZen. Released under the MIT License.
+                </span>
+
+                <span>
+                    Built by hyklfaiq
+                </span>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+    <!-- BACK TO TOP -->
+
+    <button id="top" aria-label="Back to top">
+        &#8593;
+    </button>
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================= -->
+
+    <script>
+
+        (() => {
+
+            const $ = selector =>
+                document.querySelector(selector);
+
+            const reduce =
+                matchMedia(
+                    '(prefers-reduced-motion: reduce)'
+                ).matches;
+
+            const fine =
+                matchMedia(
+                    '(hover: hover) and (pointer: fine)'
+                ).matches;
+
+            const nav = $('#nav');
+            const bar = $('#bar');
+            const top = $('#top');
+
+            /* Scroll progress */
+
+            let tick = false;
+
+            const onScroll = () => {
+
+                if (tick) return;
+
+                tick = true;
+
+                requestAnimationFrame(() => {
+
+                    const y = scrollY;
+
+                    const max =
+                        document.documentElement.scrollHeight -
+                        innerHeight;
+
+                    bar.style.transform =
+                        `scaleX(${max > 0 ? y / max : 0})`;
+
+                    nav.classList.toggle(
+                        's',
+                        y > 20
+                    );
+
+                    top.classList.toggle(
+                        'on',
+                        y > 600
+                    );
+
+                    tick = false;
+
+                });
+
+            };
+
+            addEventListener(
+                'scroll',
+                onScroll,
+                { passive: true }
+            );
+
+            onScroll();
+
+
+            /* Back to top */
+
+            top.onclick = () => {
+
+                scrollTo({
+                    top: 0,
+                    behavior: reduce
+                        ? 'auto'
+                        : 'smooth'
+                });
+
+            };
+
+
+            /* Mobile menu */
+
+            const burger = $('#burger');
+            const drawer = $('#drawer');
+
+            const setMenu = open => {
+
+                drawer.classList.toggle(
+                    'open',
+                    open
+                );
+
+                burger.setAttribute(
+                    'aria-expanded',
+                    open
+                );
+
+                burger.innerHTML =
+                    open
+                        ? '&#10005;'
+                        : '&#9776;';
+
+            };
+
+            burger.onclick = () => {
+
+                setMenu(
+                    !drawer.classList.contains('open')
+                );
+
+            };
+
+            drawer
+                .querySelectorAll('a')
+                .forEach(link => {
+
+                    link.onclick = () =>
+                        setMenu(false);
+
+                });
+
+            addEventListener(
+                'keydown',
+                event => {
+
+                    if (event.key === 'Escape') {
+                        setMenu(false);
+                    }
+
+                }
+            );
+
+
+            /* Reveal animations */
+
+            const targets =
+                document.querySelectorAll('.rv');
+
+            if (
+                reduce ||
+                !('IntersectionObserver' in window)
+            ) {
+
+                targets.forEach(element =>
+                    element.classList.add('in')
+                );
+
+            } else {
+
+                const observer =
+                    new IntersectionObserver(
+                        (entries, obs) => {
+
+                            entries.forEach(entry => {
+
+                                if (
+                                    entry.isIntersecting
+                                ) {
+
+                                    entry.target.classList.add(
+                                        'in'
+                                    );
+
+                                    obs.unobserve(
+                                        entry.target
+                                    );
+
+                                }
+
+                            });
+
+                        },
+                        {
+                            threshold: .12,
+                            rootMargin:
+                                '0px 0px -40px 0px'
+                        }
+                    );
+
+                targets.forEach(element =>
+                    observer.observe(element)
+                );
+
+            }
+
+
+            /* Marquee */
+
+            const track = $('#track');
+
+            track.innerHTML += track.innerHTML;
+
+
+            /* Feature tile spotlight */
+
+            if (fine && !reduce) {
+
+                document
+                    .querySelectorAll('.tile')
+                    .forEach(tile => {
+
+                        tile.addEventListener(
+                            'pointermove',
+                            event => {
+
+                                const rect =
+                                    tile.getBoundingClientRect();
+
+                                tile.style.setProperty(
+                                    '--mx',
+                                    `${event.clientX - rect.left}px`
+                                );
+
+                                tile.style.setProperty(
+                                    '--my',
+                                    `${event.clientY - rect.top}px`
+                                );
+
+                            }
+                        );
+
+                    });
+
+            }
+
+        })();
+
+    </script>
+
+</body>
+
+</html>
